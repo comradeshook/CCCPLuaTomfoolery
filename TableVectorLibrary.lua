@@ -35,8 +35,9 @@ function Round(num)
 	return Floor(num + 0.5);
 end
 
+-- IF THIS DOESN'T WORK THEN TRY OLD SCHOOL SUBTRACTION
 function VecShortestDistance(TVector1, TVector2, toWrap)
-	local returnVector = TVector2;
+	local returnVector = VecCopy(TVector2);
 	VecSubtract(returnVector, TVector1);
 
 	if toWrap and (wrapX or wrapY) then
@@ -54,7 +55,7 @@ function VecShortestDistance(TVector1, TVector2, toWrap)
 			end
 		end
 	end
-
+	
 	return returnVector;
 end
 
