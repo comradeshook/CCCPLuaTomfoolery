@@ -103,6 +103,7 @@ end
 function VecGetMagnitude(TVector)
 	return Sqrt(TVector[1] * TVector[1] + TVector[2] * TVector[2]);
 end
+
 function VecGetSqrMagnitude(TVector)
 	return TVector[1] * TVector[1] + TVector[2] * TVector[2];
 end
@@ -137,6 +138,14 @@ function VecGetAbsDegAngle(TVector)
 	return Deg(VecGetAbsRadAngle(TVector))
 end
 
+function VecGetRadRotatedCopy(TVector, angle)
+	local returnVector = {TVector[1], TVector[2]};
+	local adjustedAngle = -angle;
+	returnVector[1] = TVector[1] * Cos(adjustedAngle) - TVector[2] * Sin(adjustedAngle);
+	returnVector[2] = TVector[1] * Sin(adjustedAngle) + TVector[2] * Cos(adjustedAngle);
+	return returnVector;
+end
+
 function VecGetXFlipped(TVector, xFlip)
 	if xFlip then
 		return {-TVector[1], TVector[2]}
@@ -151,6 +160,15 @@ function VecGetYFlipped(TVector, yFlip)
 	else
 		return TVector
 	end
+end
+
+-- COMPARATORS - Return a boolean
+function VecMagnitudeIsGreaterThan(TVector, magnitude)
+	return VecGetSqrMagnitude(TVector) > magnitude * magnitude;
+end
+
+function VecMagnitudeIsLessThan(TVector, magnitude)
+	return VecGetSqrMagnitude(TVector) < magnitude * magnitude;
 end
 
 -- SETTERS - By definition these must change the table. :V
@@ -170,28 +188,32 @@ function VecCapMagnitude(TVector, cap)
 	return TVector;
 end
 
-function VecGetRadRotatedCopy(TVector, angle)
-	local returnVector = {TVector[1], TVector[2]};
-	local adjustedAngle = -angle;
-	returnVector[1] = TVector[1] * Cos(adjustedAngle) - TVector[2] * Sin(adjustedAngle);
-	returnVector[2] = TVector[1] * Sin(adjustedAngle) + TVector[2] * Cos(adjustedAngle);
-	return returnVector;
+function VecClampMagnitude(TVector, lowerMagnitudeLimit, upperMagnitudeLimit)
+	local lowest = Min(lowerMagnitudeLimit, upperMagnitudeLimit);
+	local highest = Max(lowerMagnitudeLimit, upperMagnitudeLimit);
+
+	if lowerMagnitudeLimit == 0 && upperMagnitudeLimit == 0 then
+		VecReset(TVector);
+	elseif VecMagnitudeIsLessThan(TVector, lowest) then
+		VecSetMagnitude(TVector, lowest);
+	elseif VecMagnitudeIsGreaterThan(TVector, highest) then
+		VecSetMagnitude(TVector, highest);
+	end
+
+	return TVector;
 end
 
 function VecAbsRotateTo(TVector, refVector)
 	return VecGetRadRotatedCopy(TVector, VecGetAbsRadAngle(refVector) - VecGetAbsRadAngle(TVector)); 
 end
 
-function VecMagnitudeIsGreaterThan(TVector, magnitude)
-	return VecGetSqrMagnitude(TVector) > magnitude * magnitude;
-end
-
-function VecMagnitudeIsLessThan(TVector, magnitude)
-	return VecGetSqrMagnitude(TVector) < magnitude * magnitude;
+function VecReset(TVector)
+	TVector[1] = 0;
+	TVector[2] = 0;
+	return TVector;
 end
 
 -- TO ADD:
--- VecClampMagnitude()
 -- VecFlipX()
 -- VecFlipY()
 -- VecIsZero()
@@ -204,7 +226,6 @@ end
 -- VecCeiling()
 -- VecNormalize()
 -- VecPerpendicularize()
--- VecReset()
 -- VecRadRotate()
 -- VecDegRotate()
 -- VecSetXY()
