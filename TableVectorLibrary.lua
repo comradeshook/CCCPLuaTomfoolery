@@ -192,7 +192,7 @@ function VecClampMagnitude(TVector, lowerMagnitudeLimit, upperMagnitudeLimit)
 	local lowest = Min(lowerMagnitudeLimit, upperMagnitudeLimit);
 	local highest = Max(lowerMagnitudeLimit, upperMagnitudeLimit);
 
-	if lowerMagnitudeLimit == 0 && upperMagnitudeLimit == 0 then
+	if lowerMagnitudeLimit == 0 and upperMagnitudeLimit == 0 then
 		VecReset(TVector);
 	elseif VecMagnitudeIsLessThan(TVector, lowest) then
 		VecSetMagnitude(TVector, lowest);
