@@ -12,13 +12,50 @@ Ceil = math.ceil;
 Abs = math.abs;
 Pi = math.pi;
 
+-- Because we need ShortestDistance baybee
+wrapX = SceneMan.SceneWrapsX;
+wrapY = SceneMan.SceneWrapsY;
+sceneWidth = SceneMan.SceneWidth;
+sceneHeight = SceneMan.SceneHeight;
+
 -- apparently std::signbit() returns true if num is negative
 function Sign(num)
 	return num < 0;
 end
 
+function GetSign(num)
+	if num < 0 then
+		return -1;
+	else
+		return 1;
+	end
+end
+
 function Round(num)
 	return Floor(num + 0.5);
+end
+
+function VecShortestDistance(TVector1, TVector2, toWrap)
+	local returnVector = TVector2;
+	VecSubtract(returnVector, TVector1);
+
+	if toWrap and (wrapX or wrapY) then
+		if wrapX then
+			local xDiff = returnVector[1] - TVector1[1];
+			if Abs(xDiff) > sceneWidth/2 then
+				returnVector[1] = returnVector[1] - GetSign(xDiff) * sceneWidth;
+			end
+		end
+
+		if wrapY then
+			local yDiff = returnVector[2] - TVector1[2];
+			if Abs(yDiff) > sceneHeight/2 then
+				returnVector[2] = returnVector[2] - GetSign(yDiff) * sceneHeight;
+			end
+		end
+	end
+
+	return returnVector;
 end
 
 -- TO USE: This library essentially treats two-entry tables e.g. {1, 2} as vectors, 
@@ -57,7 +94,7 @@ function VecToTable(vector)
 end
 
 function VecTableToVector(TVector)
-	return Vector(inputTable[1], inputTable[2]);
+	return Vector(TVector[1], TVector[2]);
 end
 
 function VecCopy(TVector)
