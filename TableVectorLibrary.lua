@@ -6,26 +6,52 @@ Cos = math.cos;
 Sin = math.sin;
 Sqrt = math.sqrt;
 Ceil = math.ceil;
-Random = math.random;
 Atan2 = math.atan2;
-Pi = math.pi;
 Floor = math.floor;
 Ceil = math.ceil;
 Abs = math.abs;
+Pi = math.pi;
 
--- TO USE: First, you may need to convert an actual vector to a table via VecToTable().
--- After that, you can use all the following operators to essentially treat
--- that table as a vector, but MUCH CHEAPER performance-wise since it skips having to 
--- go back and forth between Lua and C++.
+-- apparently std::signbit() returns true if num is negative
+function Sign(num)
+	return num < 0;
+end
+
+function Round(num)
+	return Floor(num + 0.5);
+end
+
+-- TO USE: This library essentially treats two-entry tables e.g. {1, 2} as vectors, 
+-- letting you skip the astonishingly high cost of going back and forth between C++ and Lua.
+
+-- First, you may need to convert an actual vector to a table via VecToTable().
+-- After that, you can use all the following operators to process the tables as you
+-- would vectors. Although this is clunkier than regular arithmetic operators, I don't
+-- know how to overload those in Lua, and it's still a whole lot more performant anyways.
+
 -- Note, however, that these tables can't be added directly to vectors (ala A + B),
--- so you have to use VecTableToVector() for that purpose. The conversion functions
--- are unfortunately expensive, so this whole thing is best suited for long scripts;
+-- so you might have to use VecTableToVector() for that purpose. Further note, manually
+-- adding vector.X and table[1] etc is faster than vector + table! 
+
+-- The conversion functions are unfortunately expensive, so this whole thing is best suited for long scripts;
 -- small scripts may have any performance gain completely nulled by the conversion overhead.
 -- ~ ComradeShook
 
--- also i'm not done adding all the functions yet sorry
+--------------
 
--- IMPORTANT MANAGEMENT FUNCTIONS
+-- CREATION - you REALLY don't need this, just define local newTable = {x, y}
+function VecNew(X, Y)
+	return {X, Y};
+end
+
+-- DESTRUCTION - i'm just following the source structure honestly
+function VecReset(TVector)
+	TVector[1] = 0;
+	TVector[2] = 0;
+	return TVector;
+end
+
+-- IMPORTANT MANAGEMENT FUNCTIONS - these aren't really things in source but are nice to have
 function VecToTable(vector)
 	return {vector.X, vector.Y};
 end
@@ -38,7 +64,7 @@ function VecCopy(TVector)
 	return {TVector[1], TVector[2]};
 end
 
--- ARITHMETIC FUNCTIONS - These change the (first) table!
+-- ARITHMETIC FUNCTIONS - These change the (first) table! Order of operations is as input.
 function VecAdd(TVector1, TVector2)
 	TVector1[1] = TVector1[1] + TVector2[1];
 	TVector1[2] = TVector1[2] + TVector2[2];
@@ -63,49 +89,29 @@ function VecDivide(TVector, divisor)
 	return TVector;
 end
 
--- GETTERS - These don't change the input table.
-function VecGetRoundedX(TVector)
-	return Floor(TVector[1] + 0.5)
+-- GETTERS AND SETTERS
+function GetX(TVector)
+	return TVector[1];
 end
 
-function VecGetRoundedY(TVector)
-	return Floor(TVector[2] + 0.5)
+function SetX(TVector, newX)
+	TVector[1] = newX;
+	return TVector;
 end
 
-function VecGetRounded(TVector)
-	return {Floor(TVector[1] + 0.5), Floor(TVector[2] + 0.5)}
+function GetY(TVector)
+	return TVector[2];
 end
 
-function VecGetFlooredX(TVector)
-	return Floor(TVector[1])
+function SetX(TVector, newY)
+	TVector[2] = newY;
+	return TVector;
 end
 
-function VecGetFlooredY(TVector)
-	return Floor(TVector[2])
-end
-
-function VecGetFloored(TVector)
-	return {Floor(TVector[1]), Floor(TVector[2])}
-end
-
-function VecGetCeilingedX(TVector)
-	return Ceil(TVector[1])
-end
-
-function VecGetCeilingedY(TVector)
-	return Ceil(TVector[2])
-end
-
-function VecGetCeilinged(TVector)
-	return {Ceil(TVector[1]), Ceil(TVector[2])}
-end
-
-function VecGetMagnitude(TVector)
-	return Sqrt(TVector[1] * TVector[1] + TVector[2] * TVector[2]);
-end
-
-function VecGetSqrMagnitude(TVector)
-	return TVector[1] * TVector[1] + TVector[2] * TVector[2];
+function VecSetXY(TVector, newX, newY)
+	TVector[1] = newX;
+	TVector[2] = newY;
+	return TVector;
 end
 
 function VecGetLargest(TVector)
@@ -116,42 +122,17 @@ function VecGetSmallest(TVector)
 	return Min(Abs(TVector[1]), Abs(TVector[2]))
 end
 
-function VecGetNormalized(TVector)
-	local returnVector = VecCopy(TVector);
-	return VecDivide(returnVector, VecGetMagnitude(TVector));
-end
-
-function VecGetPerpendicular(TVector)
-	return {TVector[2], -TVector[1]}
-end
-
-function VecGetAbsRadAngle(TVector)
-	local radAngle = -Atan2(TVector[2], TVector[1]); 
-	if radAngle < -Pi/2 then
-		return radAngle + Pi*2;
-	else
-		return radAngle;
-	end
-end
-
-function VecGetAbsDegAngle(TVector)
-	return Deg(VecGetAbsRadAngle(TVector))
-end
-
-function VecGetRadRotatedCopy(TVector, angle)
-	local returnVector = {TVector[1], TVector[2]};
-	local adjustedAngle = -angle;
-	returnVector[1] = TVector[1] * Cos(adjustedAngle) - TVector[2] * Sin(adjustedAngle);
-	returnVector[2] = TVector[1] * Sin(adjustedAngle) + TVector[2] * Cos(adjustedAngle);
-	return returnVector;
-end
-
 function VecGetXFlipped(TVector, xFlip)
 	if xFlip then
 		return {-TVector[1], TVector[2]}
 	else
 		return TVector
 	end
+end
+
+function VecFlipX(TVector, xFlip)
+	TVector = VecGetXFlipped(TVector, xFlip);
+	return TVector;
 end
 
 function VecGetYFlipped(TVector, yFlip)
@@ -162,16 +143,44 @@ function VecGetYFlipped(TVector, yFlip)
 	end
 end
 
--- COMPARATORS - Return a boolean
-function VecMagnitudeIsGreaterThan(TVector, magnitude)
-	return VecGetSqrMagnitude(TVector) > magnitude * magnitude;
+function VecFlipY(TVector, yFlip)
+	TVector = VecGetYFlipped(TVector, yFlip);
+	return TVector;
+end
+
+function VecXIsZero(TVector)
+	return TVector[1] == 0;
+end
+
+function VecYIsZero(TVector)
+	return TVector[2] == 0;
+end
+
+function VecIsZero(TVector)
+	return TVector[1] == 0 and TVector[2] == 0;
+end
+
+function VecIsOpposedTo(TVector1, TVector2) 
+	return ((TVector1[1] == 0 and TVector2[1] == 0) or (Sign(TVector1[1]) ~= Sign(TVector2[1]))) and ((TVector1[2] == 0 and TVector2[2] == 0) or (Sign(TVector1[2]) ~= Sign(TVector2[2])));
+end
+
+-- MAGNITUDE
+function VecGetSqrMagnitude(TVector)
+	return TVector[1] * TVector[1] + TVector[2] * TVector[2];
+end
+
+function VecGetMagnitude(TVector)
+	return Sqrt(TVector[1] * TVector[1] + TVector[2] * TVector[2]);
 end
 
 function VecMagnitudeIsLessThan(TVector, magnitude)
 	return VecGetSqrMagnitude(TVector) < magnitude * magnitude;
 end
 
--- SETTERS - By definition these must change the table. :V
+function VecMagnitudeIsGreaterThan(TVector, magnitude)
+	return VecGetSqrMagnitude(TVector) > magnitude * magnitude;
+end
+
 function VecSetMagnitude(TVector, magnitude)
 	if (TVector[1] ~= 0 or TVector[2] ~= 0) then
 		local multiplier = magnitude/VecGetMagnitude(TVector);
@@ -203,29 +212,136 @@ function VecClampMagnitude(TVector, lowerMagnitudeLimit, upperMagnitudeLimit)
 	return TVector;
 end
 
+function VecGetNormalized(TVector)
+	local returnVector = VecCopy(TVector);
+	return VecDivide(returnVector, VecGetMagnitude(TVector));
+end
+
+function VecNormalize(TVector)
+	TVector = VecGetNormalized(TVector);
+	return TVector;
+end
+
+-- ROTATION
+function VecGetAbsRadAngle(TVector)
+	local radAngle = -Atan2(TVector[2], TVector[1]); 
+	if radAngle < -Pi/2 then
+		return radAngle + Pi*2;
+	else
+		return radAngle;
+	end
+end
+
+function VecSetAbsRadAngle(TVector, angle)
+	return VecRadRotate(TVector, angle - VecGetAbsRadAngle(TVector));
+end
+
+function VecGetAbsDegAngle(TVector)
+	return Deg(VecGetAbsRadAngle(TVector))
+end
+
+function VecSetAbsDegAngle(TVector, angle)
+	return VecDegRotate(TVector, angle - VecGetAbsDegAngle(TVector));
+end
+
+function VecGetRadRotatedCopy(TVector, angle)
+	local returnVector = {TVector[1], TVector[2]};
+	local adjustedAngle = -angle;
+	returnVector[1] = TVector[1] * Cos(adjustedAngle) - TVector[2] * Sin(adjustedAngle);
+	returnVector[2] = TVector[1] * Sin(adjustedAngle) + TVector[2] * Cos(adjustedAngle);
+	return returnVector;
+end
+
+function VecRadRotate(TVector, angle)
+	TVector = VecGetRadRotatedCopy(TVector, angle);
+	return TVector;
+end
+
+function VecGetDegRotatedCopy(TVector, angle)
+	return VecGetRadRotatedCopy(TVector, Rad(angle));
+end
+
+function VecDegRotate(TVector, angle)
+	TVector = VecGetDegRotatedCopy(TVector, angle);
+	return TVector;
+end
+
 function VecAbsRotateTo(TVector, refVector)
 	return VecGetRadRotatedCopy(TVector, VecGetAbsRadAngle(refVector) - VecGetAbsRadAngle(TVector)); 
 end
 
-function VecReset(TVector)
-	TVector[1] = 0;
-	TVector[2] = 0;
+function VecGetPerpendicular(TVector)
+	return {TVector[2], -TVector[1]}
+end
+
+function VecPerpendicularize(TVector)
+	TVector = VecGetPerpendicular(TVector);
 	return TVector;
 end
 
--- TO ADD:
--- VecFlipX()
--- VecFlipY()
--- VecIsZero()
--- VecIsOpposedTo()
--- VecDot()
--- VecCross()
--- VecRound()
--- VecToHalf()
--- VecFloor()
--- VecCeiling()
--- VecNormalize()
--- VecPerpendicularize()
--- VecRadRotate()
--- VecDegRotate()
--- VecSetXY()
+-- ROUNDING
+function VecRound(TVector)
+	TVector = VecGetRounded(TVector);
+	return TVector;
+end
+
+function VecToHalf(TVector)
+	TVector[1] = Round(TVector[1] * 2) / 2;
+	TVector[2] = Round(TVector[2] * 2) / 2;
+	return TVector;
+end
+
+function VecFloor(TVector)
+	TVector = VecGetFloored(TVector);
+	return TVector;
+end
+
+function VecCeiling(TVector)
+	TVector = VecGetCeilinged(TVector);
+	return;
+end
+
+function VecGetRounded(TVector)
+	return {Round(TVector[1]), Round(TVector[2])}
+end
+
+function VecGetRoundedX(TVector)
+	return Round(TVector[1])
+end
+
+function VecGetRoundedY(TVector)
+	return Round(TVector[2])
+end
+
+function VecGetFloored(TVector)
+	return {Floor(TVector[1]), Floor(TVector[2])}
+end
+
+function VecGetFlooredX(TVector)
+	return Floor(TVector[1])
+end
+
+function VecGetFlooredY(TVector)
+	return Floor(TVector[2])
+end
+
+function VecGetCeilinged(TVector)
+	return {Ceil(TVector[1]), Ceil(TVector[2])}
+end
+
+function VecGetCeilingedX(TVector)
+	return Ceil(TVector[1])
+end
+
+function VecGetCeilingedY(TVector)
+	return Ceil(TVector[2])
+end
+
+-- VECTOR PRODUCTS
+function VecDot(TVector1, TVector2)
+	return (TVector1[1] * TVector2[1]) + (TVector1[2] * TVector2[2]);
+end
+
+function VecCross(TVector1, TVector2)
+	return (TVector1[1] * TVector2[2]) - (TVector2[1] * TVector1[2]);
+end
