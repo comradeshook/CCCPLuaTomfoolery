@@ -32,7 +32,7 @@ function GetSign(num)
 end
 
 function Round(num)
-	return Floor(num + 0.5);
+	return num >= 0 and Floor(num + 0.5) or Ceil(num - 0.5); -- stole this from StackExchange, thanks ggVGc lol
 end
 
 -- IF THIS DOESN'T WORK THEN TRY OLD SCHOOL SUBTRACTION
