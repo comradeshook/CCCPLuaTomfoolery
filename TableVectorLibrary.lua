@@ -35,23 +35,22 @@ function Round(num)
 	return num >= 0 and Floor(num + 0.5) or Ceil(num - 0.5); -- stole this from StackExchange, thanks ggVGc lol
 end
 
--- IF THIS DOESN'T WORK THEN TRY OLD SCHOOL SUBTRACTION
 function VecShortestDistance(TVector1, TVector2, toWrap)
 	local returnVector = VecCopy(TVector2);
 	VecSubtract(returnVector, TVector1);
 
 	if toWrap and (wrapX or wrapY) then
 		if wrapX then
-			local xDiff = returnVector[1] - TVector1[1];
+			local xDiff = returnVector[1];
 			if Abs(xDiff) > sceneWidth/2 then
-				returnVector[1] = returnVector[1] - GetSign(xDiff) * sceneWidth;
+				returnVector[1] = xDiff - GetSign(xDiff) * sceneWidth;
 			end
 		end
 
 		if wrapY then
-			local yDiff = returnVector[2] - TVector1[2];
+			local yDiff = returnVector[2];
 			if Abs(yDiff) > sceneHeight/2 then
-				returnVector[2] = returnVector[2] - GetSign(yDiff) * sceneHeight;
+				returnVector[2] = yDiff - GetSign(yDiff) * sceneHeight;
 			end
 		end
 	end
