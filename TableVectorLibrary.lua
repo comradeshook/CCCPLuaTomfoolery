@@ -168,7 +168,8 @@ function VecGetXFlipped(TVector, xFlip)
 end
 
 function VecFlipX(TVector, xFlip)
-	TVector = VecGetXFlipped(TVector, xFlip);
+	local vec = VecGetXFlipped(TVector, xFlip);
+	VecSetXY(TVector, vec[1], vec[2]);
 	return TVector;
 end
 
@@ -181,7 +182,8 @@ function VecGetYFlipped(TVector, yFlip)
 end
 
 function VecFlipY(TVector, yFlip)
-	TVector = VecGetYFlipped(TVector, yFlip);
+	local vec = VecGetXFlipped(TVector, yFlip);
+	VecSetXY(TVector, vec[1], vec[2]);
 	return TVector;
 end
 
@@ -255,7 +257,8 @@ function VecGetNormalized(TVector)
 end
 
 function VecNormalize(TVector)
-	TVector = VecGetNormalized(TVector);
+	local vec = VecGetNormalized(TVector);
+	VecSetXY(TVector, vec[1], vec[2]);
 	return TVector;
 end
 
@@ -290,7 +293,8 @@ function VecGetRadRotatedCopy(TVector, angle)
 end
 
 function VecRadRotate(TVector, angle)
-	TVector = VecGetRadRotatedCopy(TVector, angle);
+	local vec = VecGetRadRotatedCopy(TVector, angle);
+	VecSetXY(TVector, vec[1], vec[2]);
 	return TVector;
 end
 
@@ -299,12 +303,13 @@ function VecGetDegRotatedCopy(TVector, angle)
 end
 
 function VecDegRotate(TVector, angle)
-	TVector = VecGetDegRotatedCopy(TVector, angle);
+	local vec = VecGetDegRotatedCopy(TVector, angle);
+	VecSetXY(TVector, vec[1], vec[2]);
 	return TVector;
 end
 
 function VecAbsRotateTo(TVector, refVector)
-	return VecGetRadRotatedCopy(TVector, VecGetAbsRadAngle(refVector) - VecGetAbsRadAngle(TVector)); 
+	return VecRadRotate(TVector, VecGetAbsRadAngle(refVector) - VecGetAbsRadAngle(TVector)); 
 end
 
 function VecGetPerpendicular(TVector)
@@ -312,13 +317,15 @@ function VecGetPerpendicular(TVector)
 end
 
 function VecPerpendicularize(TVector)
-	TVector = VecGetPerpendicular(TVector);
+	local vec = VecGetPerpendicular(TVector);
+	VecSetXY(TVector, vec[1], vec[2]);
 	return TVector;
 end
 
 -- ROUNDING
 function VecRound(TVector)
-	TVector = VecGetRounded(TVector);
+	local vec = VecGetRounded(TVector);
+	VecSetXY(TVector, vec[1], vec[2]);
 	return TVector;
 end
 
@@ -329,12 +336,14 @@ function VecToHalf(TVector)
 end
 
 function VecFloor(TVector)
-	TVector = VecGetFloored(TVector);
+	local vec = VecGetFloored(TVector);
+	VecSetXY(TVector, vec[1], vec[2]);
 	return TVector;
 end
 
 function VecCeiling(TVector)
-	TVector = VecGetCeilinged(TVector);
+	local vec = VecGetCeilinged(TVector);
+	VecSetXY(TVector, vec[1], vec[2]);
 	return;
 end
 
